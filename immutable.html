@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immutable.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/immutable/3.8.2/immutable.min.js"></script>
+</head>
+<body>
+
+
+
+<script>
+
+    let {log} = console;
+
+    let map1 = Immutable.Map({a:1, b:2, c:3});
+    let map2 = map1.set('b', 50);
+    log(map1.get('b')); // 2
+    log(map2.get('b')); // 50
+
+
+</script>
+</body>
+</html>
