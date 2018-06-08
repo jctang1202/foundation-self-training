@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VUE-BUILT-IN-TRANSITION</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@reactivex/rxjs@5.5.10/dist/global/Rx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-rx@5.0.0/dist/vue-rx.min.js"></script>
+    <style>
+
+        /* 被Vue过渡系统调用 */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity .5s;
+        }
+        .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+            opacity: 0;
+        }
+
+
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+
+    <button @click="showToggle">消失出现</button>
+
+    <!-- 过渡组件 -->
+    <transition name="fade">
+
+        <p v-if="isShow">hello</p>
+
+    </transition>
+
+</div>
+
+<script>
+
+    new Vue({
+        el: "#app",
+        data: {
+
+            isShow: false
+
+        },
+        methods: {
+
+            showToggle: function () {
+
+                this.isShow = !this.isShow;
+
+            }
+
+        }
+    });
+
+</script>
+</body>
+</html>

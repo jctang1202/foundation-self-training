@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF</title>
+    <script src="libs/html2pdf/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+    sssss
+
+</div>
+
+<script>
+    const element = document.getElementById("app");
+
+    setTimeout(function () {
+
+        html2pdf(element, {
+            margin: 1,
+            filename: 'myfile.pdf',
+            image: {type: 'jpeg', quality: 0.98},
+            html2canvas: {dpi: 192, letterRendering: true},
+            jsPDF: {unit: 'pt', format: [2000, 2000], orientation: 'portrait'}
+        });
+
+    }, 2000);
+
+</script>
+</body>
+</html>

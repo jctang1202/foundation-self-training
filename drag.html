@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>演示</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+
+        html, body {
+
+            height: 100%;
+
+        }
+
+        #left {
+
+            border: 2px solid rosybrown;
+            height: 100px;
+
+        }
+
+        #right {
+
+            border: 2px solid seagreen;
+            height: calc(70% - 100px);
+            position: relative;
+            user-select: none;
+            overflow: hidden;
+
+        }
+
+        .item {
+
+            box-sizing: border-box;
+            border: 2px solid darkkhaki;
+            display: inline-block;
+            height: 50px;
+            width: 50px;
+            line-height: 50px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 2;
+            background: wheat;
+
+        }
+
+        .draggable {
+
+            position: absolute;
+
+        }
+
+        .choose {
+
+            background: cadetblue;
+
+        }
+
+        .line {
+
+            z-index: 1;
+            position: absolute;
+            display: inline-block;
+            border-top: 4px saddlebrown solid;
+            height: 1px;
+
+        }
+
+        .line:after {
+
+            display: inline;
+            position: absolute;
+            left: 50%;
+            right: 50%;
+            top: -24px;
+            content: ">";
+            font-size: 30px;
+            color: saddlebrown;
+
+        }
+
+
+    </style>
+</head>
+<body>
+
+<div id="left">
+
+    可拖拽：
+
+    <span class="item" data-info="1" draggable="true">1</span>
+    <span class="item" data-info="2" draggable="true">2</span>
+    <span class="item" data-info="3" draggable="true">3</span>
+    <span class="item" data-info="4" draggable="true">4</span>
+
+    <span class="item" data-info="A" draggable="true">A</span>
+    <span class="item" data-info="B" draggable="true">B</span>
+    <span class="item" data-info="C" draggable="true">C</span>
+
+</div>
+<br>
+<div id="right">
+
+
+</div>
+
+<p>
+
+    双击选择绿色区对象
+    <button id="build-rel">建立联系</button>
+    <button id="get-lines">获取Lines数据</button>
+    <button id="send">执行请求</button>
+
+</p>
+
+<script>
+
+    // 每个对象(操作区上的节点)
+    var eles = {};
+
+    // 每条线
+    var lines = {};
+
+    $("#left .item").on("dragstart", function (ev) {
+
+        ev.originalEvent.dataTransfer.setData("info", ev.target.dataset.info);
+
+    });
+
+    $("#right").on("dragover", function (event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+    });
+
+
+    $("#right").on("dragleave", function (event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+    });
+
+    $("#right").on("drop", function (ev) {
+
+
+        var info = ev.originalEvent.dataTransfer.getData("info");
+
+        var offset = $(this).offset();
+        var x = ev.pageX - offset.left;
+        var y = ev.pageY - offset.top;
+
+        var $span = $(`<span class="item draggable">${info}</span>`);
+        $span.attr("id", Date.now());
+        eles[$span.attr("id")] = {
+            pos: {
+                left: x - 25,
+                top: y - 25
+            },
+            sourceLines: [],
+            targetLines: [],
+            nodeType: info,
+            type: 0,
+            attribute: 0,
+            obj: {},
+            id: $span.attr("id")
+        };
+
+        // SQL输入
+        if (info == "1") {
+
+            eles[$span.attr("id")].obj = {
+                name: "admin",
+                server: "192.168.1.89",
+                port: "3306",
+                type: "Mysql",
+                access: "Native",
+                database: "prison_naming",
+                username: "root",
+                password: "1qaz!QAZ",
+                sql: "select * from admin"
+            }
+
+        } else if (info == "A") {
+
+            eles[$span.attr("id")].obj = {
+
+                filename: "text"
+
+            }
+
+        }
+
+        $(this).append($span);
+
+        $span.css({
+
+            left: x - 25,
+            top: y - 25
+
+        });
+
+
+    });
+
+    let leftClick = false;
+    let currElement;
+
+    $("#right").on("mousedown", ".item", function (ev) {
+
+        switch (ev.which) {
+            case 1:
+                leftClick = true;
+                currElement = ev.target;
+                break;
+            default:
+        }
+
+
+    }).on("mouseup", function (ev) {
+
+        leftClick = false;
+
+    }).on("dblclick", function (ev) {
+
+        $(ev.target).toggleClass("choose");
+        $(ev.target).data("time", Date.now());
+
+    });
+
+
+    $("#right").on("mousemove", function (ev) {
+
+
+        if (leftClick) {
+
+            var offset = $(this).offset();
+            var x = ev.pageX - offset.left;
+            var y = ev.pageY - offset.top;
+
+
+            var currEleId = $(currElement).attr("id");
+
+            eles[currEleId].pos = {
+                left: x - 25,
+                top: y - 25
+            };
+
+            $(currElement).css({
+                left: x - 25,
+                top: y - 25
+            });
+
+            // 触发 line 更新
+            eles[currEleId].sourceLines.forEach(function (ele, index, array) {
+
+                updateLine(eles[currEleId].pos, ele.pos.end, ele.id, true);
+                array[index].pos.start.left = eles[currEleId].pos.left;
+                array[index].pos.start.top = eles[currEleId].pos.top;
+
+            });
+
+            eles[currEleId].targetLines.forEach(function (ele, index, array) {
+
+                updateLine(ele.pos.start, eles[currEleId].pos, ele.id, false);
+                array[index].pos.end.left = eles[currEleId].pos.left;
+                array[index].pos.end.top = eles[currEleId].pos.top;
+
+            });
+
+        }
+
+    });
+
+
+    $("#build-rel").on("click", function () {
+
+        var arr = $("#right .item.choose");
+        if (arr.length === 0) {
+            alert("没有选择的对象");
+            return false;
+        }
+
+        if (arr.length === 1) {
+            alert("还需要再添加一个对象");
+            return false;
+        }
+
+        if (arr.length > 2) {
+            alert("选择的对象超过两个");
+            return false;
+        }
+
+        var firstIndex = arr.eq(0).data('time') > arr.eq(1).data("time") ? 1 : 0;
+        var lastIndex = arr.eq(0).data('time') > arr.eq(1).data("time") ? 0 : 1;
+
+        var firstNode = arr[firstIndex];
+        var lastNode = arr[lastIndex];
+
+
+        var firstPosition = $(firstNode).position();
+        var lastPosition = $(lastNode).position();
+
+        // 计算长度和角度
+
+        var distance = s(
+            {
+                x: firstPosition.left,
+                y: firstPosition.top
+            },
+            {
+                x: lastPosition.left,
+                y: lastPosition.top
+            }
+        );
+
+        var angle = getAngle({
+                x: firstPosition.left,
+                y: firstPosition.top
+            },
+            {
+                x: lastPosition.left,
+                y: lastPosition.top
+            }
+        );
+
+
+        var $line = $(`<span class="line"></span>`);
+        var lineId = Date.now();
+
+        $line.attr("id", lineId);
+
+        var firstNodeId = $(firstNode).attr("id");
+
+        eles[firstNodeId].sourceLines = eles[firstNodeId].sourceLines || [];
+
+
+        var relPos = {
+            start: firstPosition,
+            end: lastPosition
+        };
+
+        eles[firstNodeId].sourceLines.push({
+            id: lineId,
+            pos: relPos // NOTE : 这个用对象引用
+        });
+
+        var lastNodeId = $(lastNode).attr("id");
+
+        eles[lastNodeId].targetLines = eles[lastNodeId].targetLines || [];
+        eles[lastNodeId].targetLines.push({
+            id: lineId,
+            pos: relPos // NOTE : 这个用对象引用
+        });
+
+        lines[lineId] = {
+            lineId: lineId,
+            sourceNodeId: firstNodeId,
+            targetNodeId: lastNodeId
+
+
+        }; // NOTE : 这个用对象引用
+
+        $line.css({
+
+            "left": firstPosition.left + 25,
+            "top": firstPosition.top + 25,
+            "width": distance,
+            "transform": `rotate(${angle}deg)`,
+            "transform-origin": `0 0`
+
+        });
+
+        $("#right").append($line);
+
+
+    });
+
+
+    function s(obj1, obj2) {
+
+        return Math.sqrt((obj1.x - obj2.x) * (obj1.x - obj2.x) + (obj1.y - obj2.y) * (obj1.y - obj2.y));
+
+    }
+
+
+    function getAngle(p1, p2) {
+
+        return Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+
+    }
+
+    function updateLine(firstPosition, lastPosition, lineId, isSourseChange) {
+
+        var distance = s(
+            {
+                x: firstPosition.left,
+                y: firstPosition.top
+            },
+            {
+                x: lastPosition.left,
+                y: lastPosition.top
+            }
+        );
+
+        var angle = getAngle({
+                x: firstPosition.left,
+                y: firstPosition.top
+            },
+            {
+                x: lastPosition.left,
+                y: lastPosition.top
+            }
+        );
+
+        // 目标动
+        if (isSourseChange === false) {
+
+
+            $(`#${lineId}`).css({
+
+                "width": distance,
+                "transform": `rotate(${angle}deg)`,
+                "transform-origin": `0 0`
+
+            });
+
+
+        } else {
+
+            $(`#${lineId}`).css({
+
+                "left": firstPosition.left + 25,
+                "top": firstPosition.top + 25,
+                "width": distance,
+                "transform": `rotate(${angle}deg)`,
+                "transform-origin": `right right`
+
+            });
+
+        }
+
+
+    }
+
+    $("#get-lines").on("click", function () {
+
+        var elesArr = Object.keys(eles).map(function (key) {
+            return eles[key];
+        });
+
+        let lines = [];
+
+        window.linkedLines = lines;
+
+        let firstNode = null;
+        // find first node
+
+        elesArr.forEach(ele => {
+            if (ele.targetLines.length === 0) {
+                // firstNode = ele;
+                linkLines([], ele, lines);
+            }
+        });
+
+        // let lines = [];
+        // linkLines([], firstNode, lines);
+        console.log(lines);
+
+    });
+
+    function linkLines(queueForAppend, node, lines) {
+
+        let queue = Array.prototype.slice.apply(queueForAppend);
+
+        queue.push({
+            id: node.id,
+            nodeType: node.nodeType,
+            type: node.type,
+            attribute: node.attribute,
+            obj: node.obj
+        });
+
+        if (node.sourceLines.length === 0) {
+            lines.push(queue);
+            return;
+        }
+
+        node.sourceLines.forEach(ele => {
+
+            linkLines(queue, getNodeById(ele.id), lines);
+
+        });
+
+
+    }
+
+    function getNodeById(id) {
+
+        return eles[lines[id].targetNodeId];
+
+    }
+
+    $("#send").click(function () {
+
+        console.log(window.linkedLines);
+        axios.post("http://192.168.1.156:8182/excute", window.linkedLines)
+            .then((resp) => console.log(`resp => ${resp}`))
+            .catch(err => console.log(`err => ${err}`));
+
+    });
+
+
+</script>
+</body>
+</html>

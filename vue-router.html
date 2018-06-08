@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-router@3.0.1/dist/vue-router.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+
+
+    <h1>Hello App!</h1>
+    <p>
+        <router-link to="/">Go to Default</router-link>
+        <router-link to="/bar/123">Go to Bar</router-link>
+        <router-link to="/bar/456/icon">Go to Bar</router-link>
+        <router-link to="/bar/456/icon"><el-button>默认按钮</el-button></router-link>
+    </p>
+
+    <router-view></router-view>
+
+</div>
+
+
+<script>
+
+
+    const Foo = {
+        name: "Foo",
+        template: '<div><el-rate :value="4"></el-rate></div>',
+        created() {
+
+            // console.log("component-created");
+
+        },
+        // 针对组件的
+        beforeRouteUpdate(to, from, next) {
+
+            console.log("beforeRouteUpdate-c");
+            next();
+
+        },
+        beforeRouteEnter(to, from, next) {
+
+            console.log("beforeRouteUpdate-c");
+            next();
+
+        },
+        beforeRouteLeave(to, from, next) {
+
+            console.log("beforeRouteLeave-c");
+            next()
+
+        }
+    };
+
+
+    const Bar = {template: '<div>{{$route.params.id}}<router-view></router-view></div>'};
+    const Icon = {template: '<div><i class="el-icon-delete"></i></div>'};
+
+
+    const router = new VueRouter({
+        routes: [
+            {
+                path: '/',
+                component: Foo
+            },
+            {
+                path: '/bar/:id',
+                component: Bar,
+                // 针对路径的
+                beforeEnter: (to, from, next) => {
+
+                    console.log("beforeEnter");
+                    next();
+
+                },
+                afterEnter(to, from) {
+
+
+                },
+                children: [
+                    {
+                        path: "icon",
+                        component: Icon
+                    }
+                ]
+            }
+        ]
+    });
+
+
+    const app = new Vue({
+        router,
+        mounted() {
+
+            console.log(this.$router);
+            console.log(this.$route)
+
+        },
+        watch: {
+            '$route'(to, from) {
+
+                console.log(`watch-$route-to=`, to);
+                console.log(`watch-$route-form=`, from);
+
+            }
+        }
+    }).$mount('#app');
+
+
+</script>
+
+</body>
+</html>

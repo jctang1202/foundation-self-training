@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SVG</title>
+    <script src="https://cdn.jsdelivr.net/npm/svg.js@2.6.4/dist/svg.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/snapsvg@0.5.1/dist/snap.svg.min.js"></script>
+    <style>
+
+        svg {
+
+            border: 1px solid gray;
+
+        }
+
+    </style>
+</head>
+<body>
+
+<div>
+
+    <svg id="drawing" width="200" height="200">
+
+        <circle cx="22" cy="22" r="20" stroke="green" stroke-width="2" fill="yellow" id="c2"></circle>
+
+    </svg>
+
+
+</div>
+
+<script>
+
+    // const draw = SVG('drawing');
+    // const rect = draw.rect(200, 200).fill('#f06').click(() => console.log(123));
+
+    const c2 = SVG.get("c2");
+
+    let leftClick = false;
+
+    c2.mousedown(function (event) {
+        switch (event.which) {
+            case 1:
+                leftClick = true;
+                break;
+            default:
+        }
+    });
+
+    c2.mouseup(function (event) {
+        leftClick = false;
+    });
+
+    $("#drawing").on("mousemove", function (ev) {
+
+        if (leftClick)
+            c2.attr({
+
+                cx: ev.clientX - 10,
+                cy: ev.clientY - 10
+
+            })
+
+    });
+
+
+</script>
+</body>
+</html>

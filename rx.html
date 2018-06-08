@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@reactivex/rxjs@5.5.10/dist/global/Rx.min.js"></script>
+</head>
+<body>
+
+<button id="button">Click</button>
+
+<script>
+
+    const {log} = console;
+    const {Observable} = Rx;
+
+
+    // Rx.Observable.of(1, 2, 3).subscribe(function (payload) {
+    //
+    //     log(payload);
+    //
+    // });
+
+    // Rx.Observable.create(obr => {
+    //
+    //     obr.next(1);
+    //     obr.complete();
+    //
+    // }).subscribe(function (payload) {
+    //
+    //     log("cb-success:", payload);
+    //
+    // }, null, function () {
+    //
+    //     log("cb-completed");
+    //
+    // });
+
+    // Rx.Observable.create(obr => {
+    //
+    //     obr.error("Manual Error");
+    //
+    // }).catch(err => {
+    //
+    //     log("被catch拦截：", err);
+    //     return Rx.Observable.of(1);
+    //
+    // })
+    //     .subscribe(function (msg) {
+    //
+    //         log(msg);
+    //
+    //     }, function (err) {
+    //
+    //         log("onError");
+    //
+    //     });
+
+    // Rx.Observable
+    //     .merge(Rx.Observable.of(1, 2, 3), Rx.Observable.throw(4))
+    //     .do(payload => log(payload))
+    //     .retry(2)
+    //     .subscribe(function () {
+    //
+    //
+    //     }, function (err) {
+    //
+    //         log("onError:", err);
+    //
+    //     });
+
+    // Rx.Observable
+    //     .merge(Rx.Observable.of(1, 2, 3), Rx.Observable.throw(4))
+    //     .do(payload => log(payload))
+    //     .retryWhen(errorStream => {
+    //
+    //         // return errorStream.delayWhen( val => {
+    //         //
+    //         //         log(`delayWhen ${val}`);
+    //         //         return Rx.Observable.timer(3000);
+    //         //
+    //         //     })
+    //
+    //         // return errorStream.delay(3000)
+    //         //     .take(2)
+    //         //     .concat(Rx.Observable.throw('Retry limit exceeded!'));
+    //
+    //         return [];
+    //
+    //     })
+    //     .subscribe(function () {
+    //
+    //
+    //     }, function (err) {
+    //
+    //         log("onError:", err);
+    //
+    //     });
+
+    // Observable.of(1, 2, 4)
+    //     .delay(1000)
+    //     .scan((acc, curr) => {
+    //
+    //         log(`acc： ${acc}`);
+    //         log(`curr：${curr}`);
+    //
+    //         return acc + curr;
+    //
+    //         // 如果 seed 为空 ，第一个参数直接接受，不进行 scan
+    //
+    //     }, 1)
+    //     .subscribe(function (payload) {
+    //
+    //         log(payload);
+    //
+    //     });
+
+    // Observable.fromEvent(document.querySelector("#button"), "click")
+    //     .throttleTime(2000) // 每XX时间只能通过一个事件
+    //     .subscribe(function () {
+    //
+    //         log(1);
+    //
+    //     });
+
+
+    // Observable.fromEvent(document.querySelector("#button"), "click")
+    //     .debounceTime(2000) // 停止输入后XX时间方能通过最新的那个事件
+    //     .do(evt => console.log(evt))
+    //     .subscribe(function () {
+    //
+    //         log(1);
+    //
+    //     });
+
+
+    // // 冷变热
+    // // publish 的使用
+    // let liveStreaming$ = Rx.Observable.interval(1000).take(5).publish();
+    //
+    // // liveStreaming$.subscribe(
+    // //     data => console.log('1'),
+    // //     err => console.log(err),
+    // //     () => console.log('1completed')
+    // // );
+    //
+    // liveStreaming$.connect();
+    //
+    // setTimeout(() => {
+    //     liveStreaming$.subscribe(
+    //         data => console.log('2'),
+    //         err => console.log(err),
+    //         () => console.log('2completed')
+    //     )
+    // }, 2000);
+
+
+    // 自动连接
+    // .publish().refCount()
+    // let obs = Rx.Observable.interval(1000).take(3).publish().refCount();
+    //
+    // setTimeout(() => {
+    //
+    //     obs.subscribe(data => console.log('sub1', data));
+    //
+    // }, 2100);
+    //
+    // setTimeout(() => {
+    //
+    //     obs.subscribe(data => console.log('sub2', data));
+    //
+    // }, 2100);
+
+
+
+    // // share()
+    // // 像是多播了
+    // const stream$ = Observable.interval(1000)
+    //     .do(() => log("do"))
+    //     .take(3)
+    //     .share();
+    //
+    // stream$.subscribe(() => log(1));
+    // setTimeout(() => {
+    //     stream$.subscribe(() => log(2));
+    // }, 2000);
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

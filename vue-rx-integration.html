@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VUE-RX</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@reactivex/rxjs@5.5.10/dist/global/Rx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-rx@5.0.0/dist/vue-rx.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app">
+
+    <div>
+
+        <el-progress :percentage="internal$" status="success"></el-progress>
+        <el-button plain v-stream:click="click$">Click Event</el-button>
+        <el-tag>{{manual$}}</el-tag>
+        <el-tag type="info">{{promiseRetrieve$}}</el-tag>
+
+        <table>
+
+                <tr v-for="item in items$">
+                    <td>item</td>
+                </tr>
+
+        </table>
+
+    </div>
+
+</div>
+<script>
+
+    const {log} = console;
+
+    const MockServer = {
+
+        reqMessage(msg) {
+
+            return new Promise(function (resolve) {
+
+                setTimeout(() => resolve(msg), 1000);
+
+            });
+
+        }
+
+    };
+
+    const vm$1 = new Vue({
+
+        domStreams: ['click$'],
+
+        data: {
+
+            count: 0
+
+        },
+
+        methods: {},
+
+        subscriptions() {
+
+            const internal$ = Rx.Observable.interval(1000)
+                .map(val => val * 2)
+                .takeWhile(val => val <= 100);
+
+            const manual$ = Rx.Observable.create(obs => {
+
+                obs.next("Manual Observable");
+                setTimeout(function () {
+
+                    obs.complete("Manual Observable Completed");
+                    log("complete");
+
+                }, 2000);
+
+            }).concat(Rx.Observable.of("Concat an Observable"));
+
+            const promiseRetrieve$ = Rx.Observable.fromPromise(MockServer.reqMessage("!!!!"));
+
+            this.click$.subscribe(() => log(123));
+            this.click$.subscribe(() => log(456));
+
+            const items$ = Rx.Observable.interval(1000)
+                .takeWhile(val => val <= 10);
+
+            return {
+
+                internal$,
+                manual$,
+                promiseRetrieve$,
+                items$
+
+            };
+
+        }
+
+    }).$mount("#app");
+
+</script>
+</body>
+</html>

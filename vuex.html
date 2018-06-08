@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VUEX</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuex@3.0.1/dist/vuex.min.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+    <Counter></Counter>
+
+</div>
+
+
+<script type="text/x-template" id="component1">
+
+    <div>
+
+        <button @click="click">增加</button>
+        <h1>{{ count }}</h1>
+        <h2>{{ countCopy }}</h2>
+        <h3>{{ countComputed }}</h3>
+
+    </div>
+
+</script>
+
+<script>
+
+    // 用一个对象就包含了全部的应用层级状态
+    const store = new Vuex.Store({
+        state: {
+            count: 0,
+            countCopy: 123
+        },
+        mutations: {
+            increment(state) {
+                state.count++
+            }
+        },
+        getters: {
+
+            countComputed: state => {
+
+                return state.countCopy;
+
+            }
+
+        },
+
+        actions: {
+
+
+            // context 是 store 的引用
+            async countAction(context) {
+
+                context.state.count = 101;
+                // context.commit("increment");
+
+                await context.dispatch("anotherAction");
+
+                console.log("hook-anotherAction");
+
+                return new Promise(resolve => {
+
+                    setTimeout(resolve, 1000);
+
+                });
+
+            },
+
+            async anotherAction() {
+
+                return new Promise(resolve => {
+
+                    console.log("inside-anotherAction");
+                    setTimeout(resolve, 2000);
+
+                });
+
+            }
+
+        },
+
+        modules: {
+
+
+
+        }
+    });
+
+    store.commit('increment');
+
+    console.log(store.state.count); // -> 1
+
+    setTimeout(() => store.commit("increment"), 1000);
+
+    const Counter = {
+        template: document.querySelector("#component1").innerHTML,
+        computed: {
+            count() {
+
+                // 通过 Vuex.Store 实例访问
+                return store.state.count
+            },
+            countCopy() {
+
+                // 将 Vuex.Store 实例 注入 Vue 实例
+                return this.$store.state.countCopy;
+
+            },
+
+            countComputed() {
+
+                return this.$store.getters.countComputed;
+
+            }
+        },
+        methods: {
+
+            click() {
+
+                this.$store.dispatch("countAction").then(() => {
+
+                    console.log("methods-click")
+
+                });
+
+            }
+
+        }
+    };
+
+    new Vue({
+
+        store,
+
+        components: {
+            Counter
+        }
+
+    }).$mount("#app");
+
+
+</script>
+</body>
+</html>
